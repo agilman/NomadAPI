@@ -1,4 +1,5 @@
 
-** TODO [2/2]
+** TODO [3/3]
    - [X] Update README -- include instructions for installing and running the project.
    - [X] Install django rest framework
+   - [X] Respond to OPTIONS request from front end  
