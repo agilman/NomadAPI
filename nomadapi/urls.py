@@ -16,6 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from nomadapp import api
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/rest/user/<str:userName>',api.user),
+
 ]
