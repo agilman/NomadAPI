@@ -1,3 +1,4 @@
 
-# TODO[/]
+** TODO [2/2]
    - [X] Update README -- include instructions for installing and running the project.
+   - [X] Install django rest framework
