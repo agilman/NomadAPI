@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from nomadapp import api
 
@@ -22,4 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/rest/user/<str:userName>',api.user),
 
+    path("api/token/", TokenObtainPairView.as_view(),name="token"),
+    path("api/refresh_token/", TokenRefreshView.as_view(),name="refresh_token"),
 ]
