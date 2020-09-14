@@ -1,35 +1,30 @@
-from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
+from django.contrib.auth.models import User
+
+from rest_framework.parsers import JSONParser
 
 from nomadapp.serializers import *
-from nomadapp import forms
 # Create your views here.
 
 @csrf_exempt
 def registration(request):
     if request.method == 'POST':
-        form = forms.RegistrationForm(request.POST)
+        data = JSONParser().parse(request)
 
-        print(dir(form))
-        print(form.data)
-        print("YES< THIS IS A POST REQUEST RECEIVED")
-        if form.is_valid():
-            newUser = form.save()
-            serialized = UserSerializer(user).data
-            #return newUser serialized
-            print("New user registered successfully")
-            print(serialized)
-            return JsonResponse(serialized, safe=False)
-                #assign session
-            #login(request,newUser)
+        #TODO : Validate data!!!
+        nu = {
+            'username' : data['username'],
+            'email' : data['email'],
+            'password' :data['password']
+        }
 
-            #return redirect("/profile/#/")
-        else:
-            #TODO Raise validation error
-            print("invalid shit")
-            print(form.is_valid())
-            return HttpResponse("Registration error")
+        # TODO handle errors...
+        newUser = User.objects.create_user(nu['username'],nu['email'],nu['password'])
+        newUser.save()
+
+        return JsonResponse(UserSerializer(newUser).data,safe=False)
+
     elif request.method == 'OPTIONS':
         response = HttpResponse()
         response['allow'] = ','.join(['POST','OPTIONS'])

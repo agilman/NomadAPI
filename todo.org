@@ -1,9 +1,8 @@
 
-** TODO [4/4]
+** TODO [4/5]
    - [X] Update README -- include instructions for installing and running the project.
    - [X] Install django rest framework
-   - [X] Respond to OPTIONS request from front end  
+   - [X] Respond to OPTIONS request from front end
    - [X] Create a view for Json Web Token authentication
-   
-* NOTES:
-    Following Authentication tutorial: https://medium.com/@eduardo.silva./building-a-simple-application-using-nuxtjs-and-django-part-i-6027ddefc385
+   - [X] Create a view for user registration /auth/register
+   - [ ] Validate user input on registration.
