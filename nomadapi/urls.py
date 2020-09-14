@@ -18,11 +18,13 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from nomadapp import api
+from nomadapp.views import registration
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/rest/user/<str:userName>',api.user),
 
-    path("api/token/", TokenObtainPairView.as_view(),name="token"),
-    path("api/refresh_token/", TokenRefreshView.as_view(),name="refresh_token"),
+    path("auth/register/", registration, name="registration"),
+    path("auth/token/", TokenObtainPairView.as_view(),name="token"),
+    path("auth/refresh_token/", TokenRefreshView.as_view(),name="refresh_token"),
 ]
