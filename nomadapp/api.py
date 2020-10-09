@@ -16,7 +16,6 @@ def user(request,userName=None):
           serialized = UserSerializer(user).data
         except User.DoesNotExist:
             serialized = []
-            
 
         return JsonResponse(serialized, safe=False)
 
@@ -51,6 +50,20 @@ def adventures(request,advId=None):
 
         serialized = AdventureSerializer(adv)
         return JsonResponse(serialized.data,safe=False)
+
+    if request.method == 'OPTIONS':
+        response = HttpResponse()
+        response['allow'] = ','.join(['post','options'])
+        return response
+
+@csrf_exempt
+def me(request,userId):
+    if request.method == 'GET':
+        adventures = Adventure.objects.filter(user=userId)
+        advSerializer = AdventureSerializer(adventures,many=True)
+
+        total = {"adventures":advSerializer.data,"bio":"#",'profilePhotos':[]}
+        return JsonResponse(total, safe=False)
 
     if request.method == 'OPTIONS':
         response = HttpResponse()

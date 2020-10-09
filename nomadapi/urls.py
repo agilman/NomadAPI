@@ -23,6 +23,7 @@ from nomadapp.views import registration
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/rest/user/<str:userName>',api.user),
+    path('api/rest/me/<int:userId>',api.me), # path used by editor to get userinfo and adventure info 
     path('api/rest/adventures/', api.adventures),
 
     path("auth/register/", registration, name="registration"),
