@@ -51,9 +51,17 @@ def adventures(request,advId=None):
         serialized = AdventureSerializer(adv)
         return JsonResponse(serialized.data,safe=False)
 
+    if request.method == 'DELETE':
+        advToDel = Adventure.objects.get(id=advId)
+
+        advToDel.delete()
+        serialized = AdventureSerializer(advToDel)
+
+        return JsonResponse(serialized.data,safe=False)
+
     if request.method == 'OPTIONS':
         response = HttpResponse()
-        response['allow'] = ','.join(['post','options'])
+        response['allow'] = ','.join(['post','delete','options'])
         return response
 
 @csrf_exempt

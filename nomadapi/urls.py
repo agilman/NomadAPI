@@ -23,8 +23,9 @@ from nomadapp.views import registration
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/rest/user/<str:userName>',api.user),
-    path('api/rest/me/<int:userId>',api.me), # path used by editor to get userinfo and adventure info 
-    path('api/rest/adventures/', api.adventures),
+    path('api/rest/me/<int:userId>',api.me), # path used by editor to get userinfo and adventure info
+    path('api/rest/adventures/', api.adventures),  #this is for post
+    path('api/rest/adventures/<int:advId>', api.adventures), #this is for delete
 
     path("auth/register/", registration, name="registration"),
     path("auth/token/", TokenObtainPairView.as_view(),name="token"),
