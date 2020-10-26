@@ -25,6 +25,20 @@ def user(request,userName=None):
         return response
 
 @csrf_exempt
+def me(request,userId):
+    if request.method == 'GET':
+        adventures = Adventure.objects.filter(user=userId)
+        advSerializer = AdventureSerializer(adventures,many=True)
+
+        total = {"adventures":advSerializer.data,"bio":"#",'profilePhotos':[]}
+        return JsonResponse(total, safe=False)
+
+    if request.method == 'OPTIONS':
+        response = HttpResponse()
+        response['allow'] = ','.join(['get','options'])
+        return response
+
+@csrf_exempt
 def adventures(request,advId=None):
     if request.method == 'POST':
         data = JSONParser().parse(request)
@@ -64,16 +78,31 @@ def adventures(request,advId=None):
         response['allow'] = ','.join(['post','delete','options'])
         return response
 
+
 @csrf_exempt
-def me(request,userId):
+def advMaps(request,advId=None):
     if request.method == 'GET':
-        adventures = Adventure.objects.filter(user=userId)
-        advSerializer = AdventureSerializer(adventures,many=True)
+        maps = Map.objects.filter(adv=advId)
+        serialized = MapSerializer(maps,many=True)
 
-        total = {"adventures":advSerializer.data,"bio":"#",'profilePhotos':[]}
-        return JsonResponse(total, safe=False)
+        return JsonResponse(serialized.data,safe=False)
 
-    if request.method == 'OPTIONS':
-        response = HttpResponse()
-        response['allow'] = ','.join(['get','options'])
-        return response
+@csrf_exempt
+def maps(request,mapId=None):
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        adv = Adventure.objects.get(id=int(data["adv"]))
+
+        map = Map(name=data["name"],adv=adv)
+        map.save()
+
+        serialized = MapSerializer(map)
+
+        return JsonResponse(serialized.data,safe=False)
+    if request.method == 'DELETE':
+        mapToDel = Map.objects.get(id=mapId)
+
+        mapToDel.delete()
+        serialized = MapSerializer(mapToDel)
+
+        return JsonResponse(serialized.data,safe=False)
