@@ -9,3 +9,7 @@ class Adventure(models.Model):
     name = models.CharField(max_length=32)
     advType = models.IntegerField()
     advStatus = models.IntegerField()
+
+class Map(models.Model):
+    adv = models.ForeignKey(Adventure,on_delete=models.CASCADE,related_name="maps")
+    name = models.CharField(max_length=32)
