@@ -106,3 +106,57 @@ def maps(request,mapId=None):
         serialized = MapSerializer(mapToDel)
 
         return JsonResponse(serialized.data,safe=False)
+
+@csrf_exempt
+def segments(request,mapId=None):
+    if request.method=='POST':
+        data = JSONParser().parse(request)
+        #Try validation with serializers...
+
+        if "map" in data.keys() and data["map"] is not None:
+            map = Map.objects.get(id=int(data["map"]))
+            startTime  = None
+            endTime = None
+            if "startTime" in data.keys():
+                startTime = data["startTime"]
+            if "endTime" in data.keys():
+                endTime = data["endTime"]
+
+            distance = data["distance"]
+            waypoints = data["waypoints"]
+
+            #create segment
+            mapSegment = Segment(map=map,
+                                        startTime=startTime,
+                                        endTime=endTime,
+                                        distance = distance
+                                        )
+
+            mapSegment.save()
+            #create waypoints
+            for point in waypoints:
+                waypointObj = WayPoint(segment = mapSegment, lat = point[1], lng = point[0])
+                waypointObj.save()
+
+            #return custom geoJson
+            result = makeGeoJsonFromSegment(mapSegment)
+
+            return JsonResponse(result,safe=False)
+        else:
+            return JsonResponse({"error":"Bad input"})
+
+def makeGeoJsonFromSegment(segment):
+    coordinates = []
+    for coord in segment.coordinates.all():
+        coordinates.append([float(coord.lat),float(coord.lng)])
+
+    geometry = {"type":"LineString","coordinates":coordinates}
+
+    feature = {"type":"Feature",
+               "properties":{"segmentId": segment.id,
+                             "distance": segment.distance,
+                             'startTime':segment.startTime,
+                             'endTime':segment.endTime},
+               "geometry":geometry}
+
+    return feature
