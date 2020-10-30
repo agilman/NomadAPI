@@ -159,15 +159,15 @@ def makeGeoJsonFromMap(map):
         geometry = {"type":"LineString","coordinates":coordinates}
 
         segmentDict = {"type":"Feature",
+                       "geometry":geometry,
                        "properties": {"segmentId":segment.id,
-                                      'distance':segment.distance,
-                                      'startTime':segment.startTime,
-                                      'endTime':segment.endTime,
-                       "geometry":geometry}
+                                      "distance":segment.distance,
+                                      "startTime":segment.startTime,
+                                      "endTime":segment.endTime}
                        }
         features.append(segmentDict)
 
-    mapDict = {"type":"FeatureCollection","properties":{"mapId": map.id,"mapName":map.name},"features":features}
+    mapDict = {"type":"FeatureCollection", "features":features}
 
     return mapDict
 def makeGeoJsonFromSegment(segment):
@@ -178,10 +178,10 @@ def makeGeoJsonFromSegment(segment):
     geometry = {"type":"LineString","coordinates":coordinates}
 
     feature = {"type":"Feature",
-               "properties":{"segmentId": segment.id,
-                             "distance": segment.distance,
-                             'startTime':segment.startTime,
-                             'endTime':segment.endTime},
-               "geometry":geometry}
-
+               "geometry":geometry,
+               "properties":{"segmentId":segment.id,
+                             "distance":segment.distance,
+                             "startTime":segment.startTime,
+                             "endTime":segment.endTime}
+              }
     return feature
