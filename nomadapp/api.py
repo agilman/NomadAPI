@@ -7,7 +7,6 @@ from django.contrib.auth.models import User
 from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
 
-
 @csrf_exempt
 def user(request,userName=None):
     if request.method == 'GET':
@@ -144,7 +143,33 @@ def segments(request,mapId=None):
             return JsonResponse(result,safe=False)
         else:
             return JsonResponse({"error":"Bad input"})
+    if request.method=='GET':
+        map = Map.objects.get(id=mapId)
+        geoJson = makeGeoJsonFromMap(map)
+        return JsonResponse(geoJson,safe=False)
 
+def makeGeoJsonFromMap(map):
+    features = []
+    for segment in map.segments.all():
+
+        coordinates = []
+        for coord in segment.coordinates.all():
+            coordinates.append([float(coord.lat),float(coord.lng)])
+
+        geometry = {"type":"LineString","coordinates":coordinates}
+
+        segmentDict = {"type":"Feature",
+                       "properties": {"segmentId":segment.id,
+                                      'distance':segment.distance,
+                                      'startTime':segment.startTime,
+                                      'endTime':segment.endTime,
+                       "geometry":geometry}
+                       }
+        features.append(segmentDict)
+
+    mapDict = {"type":"FeatureCollection","properties":{"mapId": map.id,"mapName":map.name},"features":features}
+
+    return mapDict
 def makeGeoJsonFromSegment(segment):
     coordinates = []
     for coord in segment.coordinates.all():
