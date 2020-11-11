@@ -20,3 +20,9 @@ class RegistrationForm(UserCreationForm):
         #os.mkdir(target2)
 
         return user
+
+class photoUploadForm(forms.Form):
+    userId = forms.IntegerField()
+    advId = forms.IntegerField()
+    mapId = forms.IntegerField()
+    file = forms.FileField()
