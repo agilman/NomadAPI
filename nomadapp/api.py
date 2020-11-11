@@ -1,5 +1,6 @@
 from nomadapp.models import *
 from nomadapp.serializers import *
+from nomadapp.forms import *
 
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.models import User
@@ -185,3 +186,24 @@ def makeGeoJsonFromSegment(segment):
                              "endTime":segment.endTime}
               }
     return feature
+
+
+@csrf_exempt
+def photoUpload(request):
+    if request.method == "POST":
+        form = photoUploadForm(request.POST,request.FILES)
+        if form.is_valid():
+            f = request.FILES['file']
+            userId = form['userId'].value()
+            advId = form['advId'].value()
+            mapId = form['mapId'].value()
+            pic = handle_uploaded_photo(userId,advId,mapId,f)
+            #serialized = PictureSerializer(pic)
+
+            return JsonResponse([],safe=False)
+        else:
+            return JsonResponse({"msg":"FAIL"},safe=False)
+
+def handle_uploaded_photo(userId,advId,mapId,f):
+    print('userId:',userId,'advId:',advId,'mapId:', mapId)
+    return 1

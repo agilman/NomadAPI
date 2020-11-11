@@ -31,6 +31,7 @@ urlpatterns = [
     path('api/rest/maps/<int:mapId>', api.maps), #this is for delete
     path('api/rest/advMaps/<int:advId>', api.advMaps), #this is for get
     path('api/rest/segments/<int:mapId>', api.segments),
+    path('api/rest/photos/photoUpload', api.photoUpload),
 
     path("auth/register/", registration, name="registration"),
     path("auth/token/", TokenObtainPairView.as_view(),name="token"),
