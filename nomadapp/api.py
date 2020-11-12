@@ -109,9 +109,12 @@ def maps(request,mapId=None):
         map = Map(name=data["name"],adv=adv)
         map.save()
 
-        serialized = MapSerializer(map)
+        result = { 'id': map.id,
+                'name': map.name,
+                'geojson': makeGeoJsonFromMap(map)
+        }
 
-        return JsonResponse(serialized.data,safe=False)
+        return JsonResponse(result,safe=False)
     if request.method == 'DELETE':
         mapToDel = Map.objects.get(id=mapId)
 
