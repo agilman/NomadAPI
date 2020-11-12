@@ -88,6 +88,19 @@ def advMaps(request,advId=None):
         return JsonResponse(serialized.data,safe=False)
 
 @csrf_exempt
+def advMaps2(request, advId=None):
+    if request.method == 'GET':
+        maps = Map.objects.filter(adv=advId)
+        results = []
+        for map in maps:
+            res = {'id':map.id,
+                   'name':map.name,
+                   'geojson': makeGeoJsonFromMap(map)}
+            results.append(res)
+
+        return JsonResponse(results,safe=False)
+
+@csrf_exempt
 def maps(request,mapId=None):
     if request.method == 'POST':
         data = JSONParser().parse(request)
@@ -109,6 +122,13 @@ def maps(request,mapId=None):
 
 @csrf_exempt
 def segments(request,mapId=None):
+    if request.method=='GET':
+        """ This was used by API to get segments from 1 map at a time...
+            Moved to getting all segments with maps """
+        map = Map.objects.get(id=mapId)
+        geoJson = makeGeoJsonFromMap(map)
+        return JsonResponse(geoJson,safe=False)
+
     if request.method=='POST':
         data = JSONParser().parse(request)
         #Try validation with serializers...
@@ -144,10 +164,6 @@ def segments(request,mapId=None):
             return JsonResponse(result,safe=False)
         else:
             return JsonResponse({"error":"Bad input"})
-    if request.method=='GET':
-        map = Map.objects.get(id=mapId)
-        geoJson = makeGeoJsonFromMap(map)
-        return JsonResponse(geoJson,safe=False)
 
 def makeGeoJsonFromMap(map):
     features = []
@@ -169,8 +185,8 @@ def makeGeoJsonFromMap(map):
         features.append(segmentDict)
 
     mapDict = {"type":"FeatureCollection", "features":features}
-
     return mapDict
+
 def makeGeoJsonFromSegment(segment):
     coordinates = []
     for coord in segment.coordinates.all():
