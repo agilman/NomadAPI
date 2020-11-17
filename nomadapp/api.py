@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 
 from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
+import os
 
 @csrf_exempt
 def user(request,userName=None):
@@ -43,7 +44,6 @@ def adventures(request,advId=None):
     if request.method == 'POST':
         data = JSONParser().parse(request)
         userId = int(data["user"])
-        print("Hello", userId)
         #TODO: VALIDATION
         user = User.objects.get(pk=userId)
 
@@ -51,16 +51,12 @@ def adventures(request,advId=None):
         advType = data["advType"]
         advStatus = data["advStatus"]
 
-        #TODO
-        #If advStatus = active, need to unset previous active.
-
         adv = Adventure(name=advName,user=user,advType=advType,advStatus=advStatus)
         adv.save()
 
         #create directory
-        #media_root = settings.USER_MEDIA_ROOT
-        #os.mkdir(media_root + "/" + str(userId)+"/"+str(adv.id))
-        #os.mkdir(media_root + "/" + str(userId)+"/"+str(adv.id)+"/gear")
+        target = os.path.join(settings.USER_MEDIA_ROOT,str(userId),str(adv.id))
+        os.mkdir(target)
 
         serialized = AdventureSerializer(adv)
         return JsonResponse(serialized.data,safe=False)
@@ -113,6 +109,10 @@ def maps(request,mapId=None):
                 'name': map.name,
                 'geojson': makeGeoJsonFromMap(map)
         }
+
+        #create a directory for user media
+        target = os.path.join(settings.USER_MEDIA_ROOT, str(data["user"]),str(adv.id),str(map.id))
+        os.mkdir(target)
 
         return JsonResponse(result,safe=False)
     if request.method == 'DELETE':
@@ -224,5 +224,13 @@ def photoUpload(request):
             return JsonResponse({"msg":"FAIL"},safe=False)
 
 def handle_uploaded_photo(userId,advId,mapId,f):
-    print('userId:',userId,'advId:',advId,'mapId:', mapId)
+    #save file
+    fileName = f.name
+    filePath = os.path.join(settings.USER_MEDIA_ROOT,str(userId),str(advId),str(mapId))
+    target = os.path.join(filePath , fileName)
+
+    with open(target, 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+
     return 1
