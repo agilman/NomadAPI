@@ -1,8 +1,10 @@
 
-** TODO [4/5]
+** TODO [5/8]
    - [X] Update README -- include instructions for installing and running the project.
    - [X] Install django rest framework
    - [X] Respond to OPTIONS request from front end
    - [X] Create a view for Json Web Token authentication
    - [X] Create a view for user registration /auth/register
    - [ ] Validate user input on registration.
+   - [ ] Create a model for photos.
+   - [ ] Save photos under an internal name rather than what it was uploaded as.
