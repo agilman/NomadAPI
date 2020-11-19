@@ -16,3 +16,15 @@ class MapSerializer(serializers.ModelSerializer):
     class Meta:
         model = Map
         fields= ['id','name']
+
+class PhotoMetaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PhotoMeta
+        fields = ['lat','lng','ts']
+
+class PhotoSerializer(serializers.ModelSerializer):
+    meta = PhotoMetaSerializer(source='photometa')
+
+    class Meta:
+        model = Photo
+        fields = ['id','caption','uploadTime','meta']

@@ -24,3 +24,14 @@ class WayPoint(models.Model):
     segment = models.ForeignKey(Segment,on_delete=models.CASCADE, related_name="coordinates")
     lat = models.DecimalField(max_digits=9, decimal_places=6)
     lng = models.DecimalField(max_digits=9, decimal_places=6)
+
+class Photo(models.Model):
+    map = models.ForeignKey(Map,on_delete=models.CASCADE, related_name="photos")
+    caption = models.CharField(max_length=512,null=True)
+    uploadTime = models.DateTimeField()
+
+class PhotoMeta(models.Model):
+    photo = models.OneToOneField(Photo,on_delete=models.CASCADE)
+    lat = models.DecimalField(max_digits=9, decimal_places=6)
+    lng = models.DecimalField(max_digits=9, decimal_places=6)
+    ts = models.DateTimeField(null=True)
