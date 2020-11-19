@@ -7,7 +7,13 @@ from django.contrib.auth.models import User
 
 from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
+
+from PIL import Image
+from PIL.ExifTags import TAGS
+
 import os
+
+from datetime import datetime
 
 @csrf_exempt
 def user(request,userName=None):
@@ -216,12 +222,57 @@ def photoUpload(request):
             userId = form['userId'].value()
             advId = form['advId'].value()
             mapId = form['mapId'].value()
-            pic = handle_uploaded_photo(userId,advId,mapId,f)
-            #serialized = PictureSerializer(pic)
+            photoRecord = handle_uploaded_photo(userId,advId,mapId,f)
+            print("photoRecord:", photoRecord)
+            serialized = PhotoSerializer(photoRecord)
 
-            return JsonResponse([],safe=False)
+
+            return JsonResponse(serialized.data,safe=False)
         else:
             return JsonResponse({"msg":"FAIL"},safe=False)
+
+@csrf_exempt
+def photos(request,mapId=None):
+    if request.method=='GET':
+        results = Photo.objects.filter(map=mapId)
+        serialized = PhotoSerializer(results,many=True)
+        return JsonResponse(serialized.data,safe=False)
+
+## Helper functions...
+## These image convertion routines should be called from a queue
+##  and executed seperately from the webserver
+def convertImage(filePath,targetName,newName):
+    target = os.path.join(filePath,targetName)
+    im = Image.open(target)
+
+    im.save(os.path.join(filePath,newName), "JPEG", quality=85, optimize=True, progressive=True)
+
+def rotateImage(imgPath):
+    print(imgPath)
+    im = Image.open(imgPath)
+
+    srev = imgPath[::-1]
+    ext = imgPath[len(srev)-srev.index("."):]
+
+    if ext=="jpg" or ext=="jpeg":
+        toRotate = True
+        exifdict = im._getexif()
+        if exifdict:
+            for k in exifdict.keys():
+                if k in TAGS.keys():
+                    if TAGS[k]=="Orientation":
+                        orientation = exifdict[k]
+                        if orientation == 3:
+                            im = im.rotate(180, expand=True)
+                        elif orientation == 6:
+                            im = im.rotate(270, expand=True)
+                        elif orientation == 8:
+                            im = im.rotate(90, expand=True)
+                        else:
+                            toRotate = False
+
+        if toRotate:
+            im.save(imgPath)
 
 def handle_uploaded_photo(userId,advId,mapId,f):
     #save file
@@ -233,4 +284,20 @@ def handle_uploaded_photo(userId,advId,mapId,f):
         for chunk in f.chunks():
             destination.write(chunk)
 
-    return 1
+    #create a db record
+    myMap = Map.objects.get(id=int(mapId))
+    now = datetime.now()
+    dbPicture = Photo(map=myMap, caption=None ,uploadTime=now)
+    dbPicture.save()
+
+    #convert image to jpg, and save named after photo id
+    newName= str(dbPicture.id)+".jpg"
+    convertImage(filePath,fileName,newName)
+
+    #rotate image if needed.
+    rotateImage(os.path.join(filePath,newName))
+
+    #delete initial download
+    os.remove(os.path.join(filePath,fileName))
+
+    return dbPicture
