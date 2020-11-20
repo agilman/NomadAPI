@@ -16,12 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.views.generic import RedirectView
 
 from nomadapp import api
 from nomadapp.views import registration
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('favicon.ico',RedirectView.as_view(url='/user_media/favicon.ico')),
     path('api/rest/user/<str:userName>',api.user),
     path('api/rest/me/<int:userId>',api.me), # path used by editor to get userinfo and adventure info
     path('api/rest/adventures/', api.adventures),  #this is for post
