@@ -223,7 +223,6 @@ def photoUpload(request):
             advId = form['advId'].value()
             mapId = form['mapId'].value()
             photoRecord = handle_uploaded_photo(userId,advId,mapId,f)
-            print("photoRecord:", photoRecord)
             serialized = PhotoSerializer(photoRecord)
 
 
@@ -244,11 +243,11 @@ def photos(request,mapId=None):
 def convertImage(filePath,targetName,newName):
     target = os.path.join(filePath,targetName)
     im = Image.open(target)
+    nn = os.path.join(filePath,newName)
 
-    im.save(os.path.join(filePath,newName), "JPEG", quality=85, optimize=True, progressive=True)
+    im.save(nn, "JPEG", quality=85, optimize=True, progressive=True)
 
 def rotateImage(imgPath):
-    print(imgPath)
     im = Image.open(imgPath)
 
     srev = imgPath[::-1]
