@@ -119,6 +119,8 @@ def maps(request,mapId=None):
         #create a directory for user media
         target = os.path.join(settings.USER_MEDIA_ROOT, str(data["user"]),str(adv.id),str(map.id))
         os.mkdir(target)
+        os.mkdir(os.path.join(target,".th")) #make dir for thumbs
+        os.mkdir(os.path.join(target,".mi")) #make dir for midsize image
 
         return JsonResponse(result,safe=False)
     if request.method == 'DELETE':
@@ -273,6 +275,53 @@ def rotateImage(imgPath):
         if toRotate:
             im.save(imgPath)
 
+def resizeImage(inFile,outFile,targetWidth,targetHeight):
+    """ resize and save as a new files
+    Strategy:
+    -if picture is horizontal: resize to desired height, crop the center -- removing pixels from left and right.
+    -if picture is vertical: resize to desired width, crop the center --removing pixels from top and bottom."""
+    # TODO: Wrap in try except blocks... return error if fail
+    img = Image.open(inFile)
+    imgWidth = img.size[0]
+    imgHeight = img.size[1]
+
+    if (imgHeight>imgWidth):
+        wprecent = (float(targetWidth)/imgWidth)
+        hsize = int(float(imgHeight)*wprecent)
+
+        img = img.resize((targetWidth,hsize),Image.ANTIALIAS)
+        voffset = ( hsize - targetHeight)/2
+        box = (0,voffset,targetWidth,voffset+targetHeight)
+
+        img = img.crop(box)
+        img.save(outFile)
+
+    else:
+        #check ratios
+        if (float(targetWidth)/float(targetHeight)>float(imgWidth)/float(imgHeight)):
+            wprecent = (float(targetWidth)/imgWidth)
+            hsize = int(float(imgHeight)*wprecent)
+
+            img = img.resize((targetWidth,hsize),Image.ANTIALIAS)
+            voffset = ( hsize - targetHeight)/2
+            box = (0,voffset,targetWidth,voffset+targetHeight)
+
+            img = img.crop(box)
+            img.save(outFile)
+
+        else:
+            hprecent = (float(targetHeight)/imgHeight)
+            wsize = int(float(imgWidth)*hprecent)
+
+            img = img.resize((wsize,targetHeight),Image.ANTIALIAS)
+            hoffset = ( wsize - targetWidth)/2
+            box = (hoffset,0,hoffset+targetWidth,targetHeight)
+
+            img = img.crop(box)
+            img.save(outFile)
+
+    return 1
+
 def handle_uploaded_photo(userId,advId,mapId,f):
     #save file
     fileName = f.name
@@ -295,6 +344,10 @@ def handle_uploaded_photo(userId,advId,mapId,f):
 
     #rotate image if needed.
     rotateImage(os.path.join(filePath,newName))
+
+    #make thumb pictures
+    resizeImage(target,os.path.join(filePath,".th",newName),150, 100)
+    resizeImage(target,os.path.join(filePath,".mi",newName),670,450)
 
     #delete initial download
     os.remove(os.path.join(filePath,fileName))
