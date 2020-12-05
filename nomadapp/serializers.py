@@ -20,7 +20,7 @@ class MapSerializer(serializers.ModelSerializer):
 class PhotoMetaSerializer(serializers.ModelSerializer):
     class Meta:
         model = PhotoMeta
-        fields = ['lat','lng','ts']
+        fields = ['photo','lat','lng','ts']
 
 class PhotoSerializer(serializers.ModelSerializer):
     meta = PhotoMetaSerializer(source='photometa')

@@ -353,3 +353,33 @@ def handle_uploaded_photo(userId,advId,mapId,f):
     os.remove(os.path.join(filePath,fileName))
 
     return dbPicture
+
+@csrf_exempt
+def photoGeotag(request):
+    if request.method == "POST":
+        data = JSONParser().parse(request)
+        photos = data["photos"]
+        geotag = data['geotag']
+
+        results = []
+        for i in photos:
+            #create pic meta
+            photo = Photo.objects.get(id=i)
+
+            metaQuery  = PhotoMeta.objects.filter(photo=photo)
+            #Check if meta object already exists -> update if exists, create new one otherwise
+
+            if metaQuery.exists():
+                metaQuery.update(lat=geotag[0],lng=geotag[1])
+
+                serialized = PhotoMetaSerializer(metaQuery.first())
+                results.append(serialized.data)
+
+            else:
+                newMeta = PhotoMeta(photo = photo, lat=geotag[0], lng=geotag[1])
+                newMeta.save()
+
+                serialized = PhotoMetaSerializer(newMeta)
+                results.append(serialized.data)
+
+        return JsonResponse(results,safe=False)

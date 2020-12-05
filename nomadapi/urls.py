@@ -36,6 +36,7 @@ urlpatterns = [
     path('api/rest/segments/<int:mapId>', api.segments),
     path('api/rest/photos/photoUpload', api.photoUpload),
     path('api/rest/photos/<int:mapId>', api.photos),
+    path('api/rest/photos/geotag', api.photoGeotag),
 
     path("auth/register/", registration, name="registration"),
     path("auth/token/", TokenObtainPairView.as_view(),name="token"),
