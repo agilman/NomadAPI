@@ -19,7 +19,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.views.generic import RedirectView
 
 from nomadapp import api
-from nomadapp.views import registration
+from nomadapp.views import registration, logout_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -38,7 +38,8 @@ urlpatterns = [
     path('api/rest/photos/<int:mapId>', api.photos),
     path('api/rest/photos/geotag', api.photoGeotag),
 
-    path("auth/register/", registration, name="registration"),
-    path("auth/token/", TokenObtainPairView.as_view(),name="token"),
-    path("auth/refresh_token/", TokenRefreshView.as_view(),name="refresh_token"),
+    path("api/rest/auth/register/", registration, name="registration"),
+    path("api/rest/auth/token/", TokenObtainPairView.as_view(),name="token"),
+    path("api/rest/auth/refresh_token/", TokenRefreshView.as_view(),name="refresh_token"),
+    path("api/rest/auth/logout", logout_view, name="logout")
 ]
