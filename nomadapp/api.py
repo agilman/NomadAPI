@@ -64,6 +64,21 @@ def adventures(request,advId=None):
         target = os.path.join(settings.USER_MEDIA_ROOT,str(userId),str(adv.id))
         os.mkdir(target)
 
+        #Create map and directory for photos
+        map = Map(name=advName,adv=adv)
+        map.save()
+
+        result = { 'id': map.id,
+                'name': map.name,
+                'geojson': makeGeoJsonFromMap(map)
+        }
+
+        #create a directory for user media
+        target = os.path.join(settings.USER_MEDIA_ROOT, str(userId),str(adv.id),str(map.id))
+        os.mkdir(target)
+        os.mkdir(os.path.join(target,".th")) #make dir for thumbs
+        os.mkdir(os.path.join(target,".mi")) #make dir for midsize image
+
         serialized = AdventureSerializer(adv)
         return JsonResponse(serialized.data,safe=False)
 
@@ -105,6 +120,7 @@ def advMaps2(request, advId=None):
 @csrf_exempt
 def maps(request,mapId=None):
     if request.method == 'POST':
+        #This is no longer in use since map is created at adv creation time
         data = JSONParser().parse(request)
         adv = Adventure.objects.get(id=int(data["adv"]))
 
