@@ -37,7 +37,9 @@ def me(request,userId):
         adventures = Adventure.objects.filter(user=userId)
         advSerializer = AdventureSerializer(adventures,many=True)
 
-        total = {"adventures":advSerializer.data,"bio":"#",'profilePhotos':[]}
+        profilePhotos = UserProfilePicture.objects.filter(user=userId)
+        pS= ProfilePhotoSerializer(profilePhotos,many=True)
+        total = {"adventures":advSerializer.data,"bio":"#",'profilePhotos':pS.data}
         return JsonResponse(total, safe=False)
 
     if request.method == 'OPTIONS':
@@ -230,9 +232,9 @@ def makeGeoJsonFromSegment(segment):
               }
     return feature
 
-
 @csrf_exempt
 def photoUpload(request):
+    """ Used to upload adventure photos"""
     if request.method == "POST":
         form = photoUploadForm(request.POST,request.FILES)
         if form.is_valid():
@@ -247,6 +249,21 @@ def photoUpload(request):
             return JsonResponse(serialized.data,safe=False)
         else:
             return JsonResponse({"msg":"FAIL"},safe=False)
+
+
+
+@csrf_exempt
+def profilePhotoUpload(request):
+    """ Used to upload adventure photos"""
+    if request.method == "POST":
+        form = profilePhotoUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            userId = form.data['userId']
+            f = request.FILES['file']
+            userPic = handle_uploaded_profilePhoto(userId,f)
+            serialized = ProfilePhotoSerializer(userPic)
+            return JsonResponse(serialized.data, safe=False)
+        return JsonResponse({"msg":"Profile photo fail"},safe=False)
 
 @csrf_exempt
 def photos(request,mapId=None):
@@ -370,6 +387,30 @@ def handle_uploaded_photo(userId,advId,mapId,f):
 
     return dbPicture
 
+def handle_uploaded_profilePhoto(userId,file):
+    #write file as is, convert to decided format, add to db
+
+    #save file as is
+    path = settings.USER_MEDIA_ROOT+'/'+str(userId)+'/profile_pictures/'
+    target = path + file.name
+
+    with open(target, 'wb+') as destination:
+        for chunk in file.chunks():
+            destination.write(chunk)
+
+    #add to db
+    user = User.objects.get(pk=int(userId))
+    now = datetime.now()
+    profilePicture = UserProfilePicture(user=user,uploadTime=now)
+    profilePicture.save()
+
+    #TODD  convert,resize,thumbs
+    convertImage(path, file.name, str(profilePicture.id) + ".jpg")
+
+    #delete initial download
+    os.remove(target)
+    return profilePicture
+
 @csrf_exempt
 def photoGeotag(request):
     if request.method == "POST":
@@ -390,7 +431,6 @@ def photoGeotag(request):
 
                 serialized = PhotoMetaSerializer(metaQuery.first())
                 results.append(serialized.data)
-
             else:
                 newMeta = PhotoMeta(photo = photo, lat=geotag[0], lng=geotag[1])
                 newMeta.save()

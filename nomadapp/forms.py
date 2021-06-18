@@ -20,3 +20,7 @@ class photoUploadForm(forms.Form):
     advId = forms.IntegerField()
     mapId = forms.IntegerField()
     file = forms.FileField()
+
+class profilePhotoUploadForm(forms.Form):
+    userId = forms.IntegerField()
+    file = forms.FileField()

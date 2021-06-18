@@ -28,3 +28,8 @@ class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
         fields = ['id','caption','uploadTime','meta']
+
+class ProfilePhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfilePicture
+        fields = ['id']

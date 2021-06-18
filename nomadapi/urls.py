@@ -34,7 +34,8 @@ urlpatterns = [
     path('api/rest/advMaps/<int:advId>', api.advMaps), #this is for get
     path('api/rest/advMaps2/<int:advId>', api.advMaps2), #this combines map names with segments in one get
     path('api/rest/segments/<int:mapId>', api.segments),
-    path('api/rest/photos/photoUpload', api.photoUpload),
+    path('api/rest/photos/photoUpload', api.photoUpload), #This is used for uploading adventure photos
+    path('api/rest/photos/profilePhotoUpload', api.profilePhotoUpload), #this is to upload a profile photo
     path('api/rest/photos/<int:mapId>', api.photos),
     path('api/rest/photos/geotag', api.photoGeotag),
 
